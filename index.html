@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<body>
+<form  action="uploadFile"   enctype="multipart/form-data" method="post">
+    <input type="file"  name="filetoupload">
+    <input type="submit" value="Submit">
+</form>
+
+
+
+Percent Complete: <span id="status">0</span>%
+
+</body>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+<script>
+    var $status = $('#status');
+    /**
+     * When the form is submitted, begin checking status periodically.
+     * Note that this is NOT long-polling--that's when the server waits to respond until something changed. 
+     * In a prod env, I recommend using a websockets library with a long-polling fall-back for older broswers--socket.io is a gentleman's choice)
+     */
+    $('form').on('submit', function() {
+        var longPoll = setInterval(function () {
+            $.get('/uploadFile').then(function (status) {
+                $status.text(status);
+
+                //when it's done, stop annoying the server
+                if (parseInt(status) === 100) {
+                    clearInterval(longPoll);
+                }
+            });
+        }, 500);
+    });
+</script>
+</html>
